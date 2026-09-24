@@ -11,12 +11,12 @@ export default function Border({ columns, rows, rowStyle }: BoarderProps) {
     return (
         <div className="">
             <table className="w-full">
-                <thead>
+                <thead className="text-gray-500 border-b border-gray-300 text-center">
                     <tr>
                         {
                             columns.map((cols, index) => {
                                 return (
-                                    <th key={`col_${index}`} >
+                                    <th key={`col_${index}`} className="font-normal py-2">
                                         {cols}
                                     </th>
                                 )

@@ -29,7 +29,7 @@ export default function Contents() {
     const rowStyles ="h-12"
     return (
         <div>
-            <div className="h-50">콘텐츠</div>
+
             <div>
                 <Border columns={columns} rows={rows} rowStyle={rowStyles} />
                 <Pagenation totalCount={20} perPage={10} currentPage={currentPage} onPageChange={changePage}/>
