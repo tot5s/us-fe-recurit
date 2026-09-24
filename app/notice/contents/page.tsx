@@ -1,6 +1,6 @@
 "use client"
 
-import Border from "@/components/common/Boarder"
+import Border from "@/components/common/Border"
 import { useState, useEffect } from "react";
 
 
@@ -19,11 +19,13 @@ export default function Contents() {
     useEffect(() => {
         
     }, [])
+
+    const rowStyles ="h-12"
     return (
         <div>
             <div>콘텐츠</div>
             <div>
-                <Border columns={columns} rows={rows} />
+                <Border columns={columns} rows={rows} rowStyle={rowStyles} />
             </div>
         </div>
     )
