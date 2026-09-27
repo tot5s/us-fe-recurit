@@ -16,13 +16,13 @@ export default function Pagenation({totalCount, perPage, currentPage, onPageChan
     
     // useEffect가 로컬에서 두번 호출되는 이슈 발생
     // codex에 그 이유와 방지 할수 있는 방법 제안 요청
-    
+
     useEffect(() => {
         setTotal(Array.from({length: totalPage}, (_, i) => i + 1))
     }, [totalPage])
 
     return (
-        <div className="w-full">
+        <div className="w-full py-2">
             {totalCount > 0 && (
                 <div className="flex items-center justify-center gap-2">
                     {
