@@ -29,9 +29,12 @@ export default function TextBox({placeholder, title, limit, onTextBoxHandler}: T
                     onTextBoxHandler(e.target.value)
                 }}
                 />
-                <div className="text-gray-300 absolute bottom-2.5 right-5">
-                    {str}/{limit}
-                </div>
+               {limit && (
+                    <div className="text-gray-300 absolute bottom-2.5 right-5">
+                        {str}/{limit}
+                    </div>
+                )
+               }
             </div>
         </div>
     )

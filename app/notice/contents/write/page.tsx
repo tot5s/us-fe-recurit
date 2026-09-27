@@ -28,15 +28,19 @@ export default function Write() {
             <div className="border-b border-gray-300"></div>
             <div className="space-y-4">
                 <div>
-                    <Texts title={"제목"} type={"text"} placeholder={"제목을 입력해주세요 (최대 50자)"} limit={50}/>
+                    <Texts title={"제목"} type={"text"} placeholder={"제목을 입력해주세요 (최대 50자)"} limit={50}
+                    onTextHandler={(str) => {
+
+                    }}
+                    />
                 </div>
                 <div>
                     <TextBox 
                         title={"내용"}
                         placeholder={"내용을 입력해주세요 (최대 500자)"}
                         limit={500}
-                        onTextBoxHandler={() => {
-                            
+                        onTextBoxHandler={(str) => {
+
                         }}
                     />
                 </div>

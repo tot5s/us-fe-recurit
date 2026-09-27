@@ -2,9 +2,9 @@ import { useState } from "react";
 
 type TextsProps = {
     type: string;
-    placeholder: string;
-    title: string;
-    limit: number;
+    placeholder?: string;
+    title?: string;
+    limit?: number;
     onTextHandler: (str:string) => void
 }
 
@@ -29,9 +29,13 @@ export default function Texts({type, placeholder, title, limit, onTextHandler}: 
                         onTextHandler(e.target.value)
                     }}
                 />
-                <div className="text-gray-300 absolute top-2.5 right-5">
-                    {str}/{limit}
-                </div>
+                {
+                    limit && (
+                        <div className="text-gray-300 absolute top-2.5 right-5">
+                            {str}/{limit}
+                        </div>
+                    )
+                }
             </div>
         </div>
     )

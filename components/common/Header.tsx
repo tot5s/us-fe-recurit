@@ -11,7 +11,7 @@ export default function Header () {
         if(str == 'contents') {
             location.href = '/notice/contents/write'
         } else if (str == 'alerts') {
-            location.href = '/notice/setalerts/addalert'
+            location.href = '/notice/setalerts/write'
         }
     }
 
@@ -50,29 +50,49 @@ export default function Header () {
                 </div>
                 <div>
                     <Button text={'새 글쓰기'} onClick={() => {
-                        addNote('contents')
+                        pathName.includes('contents') ?
+                        addNote('contents') : addNote('alerts')
                     }}/>
                 </div>
             </div>
                 ) : (
                     <div>
-                        <div className="flex items-center justify-between py-4  max-w-300 mx-auto">
-                        <div className="flex items-center gap-4 space-x-4">
-                            <div>
-                                <button onClick={() => {
+                        {pathName.includes('contents') ? (
+                            <div className="flex items-center justify-between py-4  max-w-300 mx-auto">
+                            <div className="flex items-center gap-4 space-x-4">
+                                <div>
+                                    <button onClick={() => {
+                                        
+                                    }}>
+                                        콘텐츠 쓰기
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button text={'임시저장'} onClick={() => {}} type={'light'}/>
+                                <Button text={'발행하기'} onClick={() => {
                                     
-                                }}>
-                                    컨텐츠 쓰기
-                                </button>
+                                }}/>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Button text={'임시저장'} onClick={() => {}} type={'light'}/>
-                            <Button text={'발행하기'} onClick={() => {
-                                
-                            }}/>
+                        ) : (
+                            <div className="flex items-center justify-between py-4  max-w-300 mx-auto">
+                            <div className="flex items-center gap-4 space-x-4">
+                                <div>
+                                    <button onClick={() => {
+                                        
+                                    }}>
+                                        알림 발송
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button text={'발행하기'} onClick={() => {
+                                    
+                                }}/>
+                            </div>
                         </div>
-                    </div>
+                        )}
                     </div>
                 )
             }
