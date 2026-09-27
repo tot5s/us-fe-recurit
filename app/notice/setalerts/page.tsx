@@ -1,23 +1,30 @@
 "use client"
 
-import Border from "@/components/common/Border";
+import Pagenation from "@/components/ui/pagenation";
 
 import { useState } from "react";
 
 
 export default function SetAlerts() {
 
+    // pagination 값
+     const [currentPage , setCurrentPage] = useState(1)
+
+
     const columns = [
         '번호', '제목', '발송 성공', '발송 실패', '발송 날짜', '공개일자', '상태'
     ]
     
-    const [rows, setRows] = useState<object[]>([
+    const [rows, setRows] = useState([
         { id: 1, title: '알림설정 제목 1', success: 10, fail: 2, sendDate: '2023-01-01', date: '2023-01-01', state: '발송' },
         { id: 2, title: '알림설정 제목 2', success: 5, fail: 0, sendDate: '2023-01-02', date: '2023-01-02', state: '실패' },
         { id: 3, title: '알림설정 제목 3', success: 8, fail: 1, sendDate: '2023-01-03', date: '2023-01-03', state: '예약' }
     ]);
 
-    
+     const changePage = (page: number) => {
+        setCurrentPage(page)
+    }
+
     return (
         <div className="">
             <div className="py-4">
@@ -66,6 +73,10 @@ export default function SetAlerts() {
                         }
                     </tbody>
                 </table>
+
+                <div>
+                    <Pagenation totalCount={20} perPage={10} currentPage={currentPage} onPageChange={changePage}/>
+                </div>
             </div>
         </div>
     )
