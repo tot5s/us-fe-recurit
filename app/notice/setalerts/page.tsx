@@ -27,6 +27,9 @@ export default function SetAlerts() {
 
     return (
         <div className="">
+            <div className="text-[38px] font-bold ">
+                알람
+            </div>
             <div className="py-4">
                  <table className="w-full">
                     <thead className="text-gray-500 border-b border-gray-300 text-center">

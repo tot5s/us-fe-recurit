@@ -45,6 +45,10 @@ export default function Contents() {
     
     return (
         <div>
+            
+            <div className="text-[38px] font-bold ">
+                콘텐츠
+            </div>
             <div className="flex items-center justify-end gap-2">
                 <div>
                 <Select val={categoryVal} list={categorys} optOnChange={categoryOnChange} placehorderStr="카테고리"/>
