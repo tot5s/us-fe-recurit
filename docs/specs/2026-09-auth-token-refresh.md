@@ -34,13 +34,15 @@
 ## 요구사항
 
 - 응답의 `access_token` 또는 `accessToken`을 액세스 토큰으로 인식합니다.
+- 로그인 응답의 `refresh_token`을 HttpOnly 쿠키에 저장하고, `refresh_expires_at` 값이 유효한 날짜 문자열이면 쿠키 만료 시각으로 반영합니다.
 - 응답의 `expires_in` 또는 `expiresIn`(초)을 사용하며, 값이 없으면 15분으로 간주합니다.
 - 만료 시각 30초 전에 토큰 갱신을 시작합니다.
 - 브라우저의 refresh token은 `HttpOnly`, `SameSite=Lax`, 운영 환경 `Secure` 쿠키로 저장됩니다.
 - Next.js 갱신 Route Handler가 쿠키의 refresh token을 외부 API의 `POST /api/v1/auth/refresh`에 전달합니다.
+- 브라우저는 same-origin 경로 `/api/v1/auth/refresh`의 Next.js Route Handler를 호출합니다.
 - 기본 인증 API 주소는 `https://fe-assignment-api.us-insight.com`이며 `AUTH_API_BASE_URL` 환경 변수로 변경할 수 있습니다.
 - 응답은 최상위 또는 `data` 래퍼 안의 토큰 필드를 허용합니다.
-- 외부 refresh API가 `refreshToken` 요청 필드를 받는다는 기존 클라이언트 호출 형식을 유지합니다. 실제 백엔드 계약과 다르면 조정해야 합니다.
+- 로그인 응답의 `refresh_token`을 HttpOnly 쿠키에 저장하고, 외부 refresh API 요청에는 `refresh_token` 필드로 전달합니다.
 
 ## 예외 및 실패 처리
 
@@ -60,4 +62,4 @@
 - [인증 모듈](../../lib/auth.ts)
 - [로그인 API 함수](../../app/api/Admin.tsx)
 - [로그인 Route Handler](../../app/api/auth/login/route.ts)
-- [토큰 갱신 Route Handler](../../app/api/auth/refresh/route.ts)
+- [토큰 갱신 Route Handler](../../app/api/v1/auth/refresh/route.ts)

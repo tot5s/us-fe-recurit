@@ -2,10 +2,12 @@
 
 import { usePathname } from "next/navigation"
 import Button from "../ui/Button"
+import { useNoticeDraft } from "@/app/notice/NoticeDraftContext"
 
 export default function Header () {
 
     const pathName = usePathname()
+    const { isPublishable, publishContents } = useNoticeDraft()
     
     const addNote = (str: string) => {
         if(str == 'contents') {
@@ -70,9 +72,11 @@ export default function Header () {
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button text={'임시저장'} onClick={() => {}} type={'light'}/>
-                                <Button text={'발행하기'} onClick={() => {
-                                    
-                                }}/>
+                                <Button
+                                    text={'발행하기'}
+                                    onClick={publishContents}
+                                    disabled={!isPublishable}
+                                />
                             </div>
                         </div>
                         ) : (

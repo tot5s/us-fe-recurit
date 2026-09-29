@@ -2,9 +2,14 @@
 type CheckboxProps = {
     title: string,
     discription: string,
-    list: object[]
+    list: {
+        title: string;
+        val: string;
+    }[],
+    categoryVal: string[];
+    onChange: (list: string) => void
 }
-export default function Checkbox ({title, discription, list} : CheckboxProps) {
+export default function Checkbox ({title, discription, list, categoryVal, onChange} : CheckboxProps) {
 
     return (
         <div className="space-y-3">
@@ -18,11 +23,24 @@ export default function Checkbox ({title, discription, list} : CheckboxProps) {
                     {discription}
                 </div>
             </div>
-           <div>
-                <label htmlFor="tag-1" className="checked:text-green-400 border rounded-xl px-2 py-1.5 ">
-                    <input type="checkbox" className="checked:text-green-600 mr-2" name="tags" id={"tag-1"} />
-                    test
-                </label>
+           <div className="flex items-center gap-2 flex-wrap">
+               {list.map((list) => (
+                    <label key={list.val} className="border border-gray-300 px-2 rounded-xl ">
+                    <input
+                        type="checkbox"
+                        name="tags"
+                        value={list.val}
+                        checked={categoryVal.includes(list.val)}
+                        disabled={
+                        categoryVal.length >= 3 &&
+                        !categoryVal.includes(list.val)
+                        }
+                        onChange={() => onChange(list.val)}
+                        className="mr-2"
+                    />
+                    {list.title}
+                    </label>
+                ))}
            </div>
         </div>
     )

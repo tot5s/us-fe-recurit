@@ -29,7 +29,7 @@
 
 - refresh token은 브라우저 스크립트에서 직접 조회할 수 없습니다.
 - access token은 클라이언트 메모리에 있으므로 브라우저 JavaScript 실행 중 XSS 위험까지 제거되는 것은 아닙니다.
-- 외부 API가 `POST /api/v1/auth/refresh`에서 `refreshToken` JSON 필드를 받는다는 기존 구현의 계약을 사용합니다. 실제 API 계약이 다르면 Route Handler의 요청 형식을 조정해야 합니다.
+- 외부 API의 확인된 필드 계약에 따라 `POST /api/v1/auth/refresh` 요청 본문에 `refresh_token`을 전달합니다.
 - 기본 API 주소는 `https://fe-assignment-api.us-insight.com`이며 `AUTH_API_BASE_URL`로 설정을 덮어쓸 수 있습니다.
 
 ## 참고 자료

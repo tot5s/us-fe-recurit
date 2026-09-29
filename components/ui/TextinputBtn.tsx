@@ -4,56 +4,64 @@ import { useState } from "react";
 
 
 type TextInputBtnProps ={
-    title: string;
-    onClick: (str: string) => void;
-    removeClick: (string: string) => void;
-    urlStr: string;
+    title: string
+    urlText: string
+    urlStr: string
+    onUrlChange: (value: string) => void
+    onAdd: () => void
+    onRemove: () => void
 }
 
-export default function TextinputBtn({title, onClick, removeClick, urlStr} : TextInputBtnProps) {
+export default function TextinputBtn({title, onAdd, onRemove, onUrlChange, urlStr, urlText} : TextInputBtnProps) {
 
-    const [urlText, setUrlText] = useState('')
-    const addText = () => {
-        onClick(urlText)
-    }
-
-    const removeHandler = () => {
-        setUrlText('')
-        removeClick('')
-    }
     return (
         <div className="w-full space-y-2">
-            <div>
-                <span className="font-bold">
-                    {title}
-                </span>
-            </div>
-            <div className="flex items-center gap-2">
-                
-                <input readOnly={urlStr !== '' } className={urlStr == '' ? "w-full border border-gray-300 rounded-xl p-2" : "w-full border border-gray-300 rounded-xl p-2 bg-gray-100 text-gray-300"} type="text" onChange={(e) => {
-                    setUrlText(e.target.value)
-                }}/>
-                <div className="w-15 text-center bg-[#17A48A] text-white rounded-xl p-2 font-semibold">
-                    <button className="" onClick={() => {
-                        addText()
-                    }}>
-                        삽입
-                </button>
-                </div>
-            </div>
-           {
-            urlStr && (
-            <div className="relative">
-                <div className="border border-gray-300 bg-gray-100 p-2 rounded-xl">
-                    {urlStr}
-                </div>
-                <div className="absolute top-2 right-5">
-                    <button onClick={removeHandler}>x</button>
-                </div>
-            </div>
-            )
-           }
+      <div>
+        <span className="font-bold">
+          {title}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={
+            urlStr !== ''
+              ? '삽입된 링크가 있습니다.'
+              : urlText
+          }
+          readOnly={urlStr !== ''}
+          className={
+            urlStr === ''
+              ? 'w-full border border-gray-300 rounded-xl p-2'
+              : 'w-full border border-gray-300 rounded-xl p-2 bg-gray-100 text-gray-300'
+          }
+          onChange={(e) => {
+            onUrlChange(e.target.value)
+          }}
+        />
+
+        <div className="w-15 text-center bg-[#17A48A] text-white rounded-xl p-2 font-semibold">
+          <button onClick={onAdd}>
+            삽입
+          </button>
         </div>
+      </div>
+
+      {urlStr && (
+        <div className="relative">
+          <div className="border border-gray-300 bg-gray-100 p-2 rounded-xl">
+            {urlStr}
+          </div>
+
+          <div className="absolute top-2 right-5">
+            <button onClick={onRemove}>
+              x
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
     )
 
 }

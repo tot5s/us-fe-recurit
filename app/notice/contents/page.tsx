@@ -1,70 +1,78 @@
 "use client"
 
+
+import category from '@/public/common/category.json'
 import { GetContentsListFn } from "@/app/api/Notice";
-import Border from "@/components/common/Border"
 import Pagenation from "@/components/ui/pagenation";
 import Select from "@/components/ui/Select";
 
 import { useState, useEffect } from "react";
+import dayjs from 'dayjs';
 
+const categoryOptions = category.category
+const publicStatusOptions = [
+    {title: '비공개', val: 'draft'},
+    {title: '예약', val: 'scheduled'},
+    {title: '공개', val: 'published'}
+]
 
 export default function Contents() {
 
     // pagenation 값
     const [currentPage , setCurrentPage] = useState(1)
     const [limit, setLimit] = useState(10)
+    const [total, setTotal] = useState(0)
 
-    const [rows, setRows] = useState([
-        { id: 1, title: '공지사항 제목 1', date: '2023-01-01', state: '공개' },
-        { id: 2, title: '공지사항 제목 2', date: '2023-01-02', state: '비공개' },
-        { id: 3, title: '공지사항 제목 3', date: '2023-01-03', state: '공개' }
-    ]);
-
-    const status = [
-        {title: 'public', val: 'public'},
-        {title: 'private', val: 'private'},
-    ]
-  
-    const categorys = [
-        {title: '2차 전지', val:'secondaryBattery'},
-        {title: '부동산', val: 'realty'},
-        {title: '투자기법', val: 'investment'},
-        {title: '국내주식', val: 'domesticStock'},
-        {title: '경제원론', val: 'economicTheory'},
-        {title: '해외주식', val: 'foreignStock'},
-        {title: '암호화폐', val: 'cryptoCurrency'},
-        {title: '기업분석', val: 'companyAnalysis'},
-        {title: '거시경제', val: 'macroEconomics'},
-        {title: '재테크', val: 'personalFinance'},
-        {title: '안전자산', val: 'safeAsset'}
-    ]
     const [ categoryVal, setCategoryVal] = useState('')
-
-    const public_status = [
-        {title: '비공개', val: 'draft'},
-        {title: '예약', val: 'scheduled'},
-        {title: '공개', val: 'published'}
-    ]
     const [ statusVal, setStatusVal ] = useState('')
+    const [isQueryInitialized, setIsQueryInitialized] = useState(false)
 
-    const getContents = async() => {
-        await GetContentsListFn({
-            page : currentPage,
-            limit: limit,
-            status: 'public',
-            category: categoryVal,
-            publish_status: statusVal
-        })
-    }
-   
+    const [rows, setRows] = useState([])
 
     useEffect(() => {
-        getContents()
-    }, [currentPage, limit, categoryVal, statusVal])
+        const params = new URLSearchParams(window.location.search)
+        const pageParam = Number(params.get('page'))
+        const categoryParam = params.get('category') ?? ''
+        const statusParam = params.get('status') ?? ''
 
+        setCurrentPage(Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1)
+        setCategoryVal(categoryOptions.some((item) => item.val === categoryParam) ? categoryParam : '')
+        setStatusVal(publicStatusOptions.some((item) => item.val === statusParam) ? statusParam : '')
+        setIsQueryInitialized(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isQueryInitialized) return
+
+        const params = new URLSearchParams(window.location.search)
+        params.set('page', String(currentPage))
+        if (categoryVal) params.set('category', categoryVal)
+        else params.delete('category')
+        if (statusVal) params.set('status', statusVal)
+        else params.delete('status')
+
+        const query = params.toString()
+        const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`
+        window.history.replaceState(null, '', nextUrl)
+    }, [isQueryInitialized, currentPage, categoryVal, statusVal])
+
+    useEffect(() => {
+        if (!isQueryInitialized) return
+
+        GetContentsListFn({
+            page: currentPage,
+            limit,
+            category: categoryVal,
+            publish_status: statusVal,
+        }).then((res) => {
+            setTotal(res.data.total)
+            setRows(res.data.contents)
+        })
+    }, [isQueryInitialized, currentPage, limit, categoryVal, statusVal])
 
     const statusOnChange = (opt: string) => {
         setStatusVal(opt)
+        setCurrentPage(1)
     }
 
 
@@ -80,12 +88,13 @@ export default function Contents() {
             </div>
             <div className="flex items-center justify-end gap-2">
                 <div>
-                <Select val={categoryVal} list={categorys} optOnChange={(str) => {
+                <Select val={categoryVal} list={categoryOptions} optOnChange={(str) => {
                     setCategoryVal(str)
+                    setCurrentPage(1)
                 }} placehorderStr="카테고리"/>
                 </div>
                 <div>
-                    <Select val={statusVal} list={public_status} optOnChange={statusOnChange} placehorderStr="상태"/>
+                    <Select val={statusVal} list={publicStatusOptions} optOnChange={statusOnChange} placehorderStr="상태"/>
                 </div>
             </div>
             <div className="py-4">
@@ -100,26 +109,32 @@ export default function Contents() {
                     </thead>
                     <tbody>
                         {
-                            rows.map((row) => (
-                                <tr key={row.id} className="text-center">
+                            rows.map((row, idx) => (
+                                <tr key={idx} className="text-center">
                                     <td className="py-4">
-                                        {row.id}
+                                        {row?.id}
                                     </td>
                                     <td className=" py-4 flex items-center justify-between px-4 text-left">
                                         <div>
-                                            {row.title}
+                                            {row?.title}
                                         </div>
-                                        <div className="">
-                                            <button className="text-gray-500 border border-gray-500 px-2 py-2.5 text-sm rounded-lg">
-                                                푸시알림 생성
-                                            </button>
-                                        </div>
+                                        {
+                                            !row?.notification_status?.has_notification && (
+                                             <div className="">
+                                                <button className="text-gray-500 border border-gray-500 px-2 py-2.5 text-sm rounded-lg">
+                                                    푸시알림 생성
+                                                </button>
+                                            </div>
+                                            )
+                                         }
                                     </td>
-                                    <td className="py-4">{row.date}</td>
+                                    <td className="py-4">{dayjs(row?.created_at).format('YY.MM.DD HH:mm')}</td>
                                     <td className="py-4">
                                         <div className="badge bg-[#F5FBFA] text-sm text-[#17A48A] rounded-lg">
                                             
-                                            {row.state}
+                                            {
+                                                row?.status == 'private' ? '비공개' : '공개'
+                                            }
                                         </div>
                                     </td>
                                 </tr>
@@ -127,7 +142,7 @@ export default function Contents() {
                         }
                     </tbody>
                 </table>
-                <Pagenation totalCount={20} perPage={limit} currentPage={currentPage} onPageChange={changePage}/>
+                <Pagenation totalCount={total} perPage={limit} currentPage={currentPage} onPageChange={changePage}/>
             </div>
         </div>
     )

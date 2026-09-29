@@ -49,7 +49,7 @@ export function clearAuthTokens() {
 
 async function requestNewAccessToken(): Promise<string | null> {
   try {
-    const response = await fetch("/api/auth/refresh", {
+    const response = await fetch("/api/v1/auth/refresh", {
       method: "POST",
       credentials: "same-origin",
       cache: "no-store",
@@ -97,6 +97,7 @@ export async function fetchWithAuth(
   const makeRequest = (token: string) => {
     const headers = new Headers(init.headers)
     headers.set("Authorization", `Bearer ${token}`)
+    headers.set("Content-Type", "application/json")
     return fetch(input, { ...init, headers })
   }
 

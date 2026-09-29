@@ -6,6 +6,7 @@ export type AuthTokenPayload = {
   accessToken?: unknown
   refresh_token?: unknown
   refreshToken?: unknown
+  refresh_expires_at?: unknown
   expires_in?: unknown
   expiresIn?: unknown
 }
@@ -28,6 +29,13 @@ export function getAccessToken(payload: AuthTokenPayload) {
 export function getRefreshToken(payload: AuthTokenPayload) {
   const token = payload.refresh_token ?? payload.refreshToken
   return typeof token === "string" && token.length > 0 ? token : null
+}
+
+export function getRefreshExpiresAt(payload: AuthTokenPayload) {
+  if (typeof payload.refresh_expires_at !== "string") return undefined
+
+  const timestamp = Date.parse(payload.refresh_expires_at)
+  return Number.isNaN(timestamp) ? undefined : new Date(timestamp)
 }
 
 export function getExpiresIn(payload: AuthTokenPayload) {

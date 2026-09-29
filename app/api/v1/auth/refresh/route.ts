@@ -2,12 +2,15 @@ import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import {
   AUTH_API_BASE_URL,
+  getAccessToken,
   getExpiresIn,
+  getRefreshExpiresAt,
   getRefreshToken,
   unwrapAuthPayload,
 } from "@/lib/auth-server"
 
 const REFRESH_COOKIE = "us_refresh_token"
+const REFRESH_COOKIE_PATH = "/api/v1/auth/refresh"
 
 export async function POST() {
   const cookieStore = await cookies()
@@ -22,7 +25,7 @@ export async function POST() {
     upstream = await fetch(`${AUTH_API_BASE_URL}/api/v1/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({ refresh_token: refreshToken }),
       cache: "no-store",
     })
   } catch {
@@ -43,7 +46,7 @@ export async function POST() {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        path: "/api/auth",
+        path: REFRESH_COOKIE_PATH,
         maxAge: 0,
       })
     }
@@ -72,7 +75,8 @@ export async function POST() {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      path: "/api/auth",
+      path: REFRESH_COOKIE_PATH,
+      expires: getRefreshExpiresAt(payload),
     })
   }
 

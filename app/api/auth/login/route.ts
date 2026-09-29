@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server"
 import {
   AUTH_API_BASE_URL,
+  getAccessToken,
   getExpiresIn,
+  getRefreshExpiresAt,
   getRefreshToken,
   unwrapAuthPayload,
 } from "@/lib/auth-server"
 
 const REFRESH_COOKIE = "us_refresh_token"
+const REFRESH_COOKIE_PATH = "/api/v1/auth/refresh"
 
 export async function POST(request: Request) {
   let credentials: { email?: unknown; password?: unknown }
@@ -62,7 +65,8 @@ export async function POST(request: Request) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/api/auth",
+    path: REFRESH_COOKIE_PATH,
+    expires: getRefreshExpiresAt(payload),
   })
 
   return response

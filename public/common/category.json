@@ -1,0 +1,15 @@
+{
+    "category": [
+        {"title": "2차 전지", "val": "secondaryBattery"},
+        {"title": "부동산", "val": "realty"},
+        {"title": "투자기법", "val": "investment"},
+        {"title": "국내주식", "val": "domesticStock"},
+        {"title": "경제원론", "val": "economicTheory"},
+        {"title": "해외주식", "val": "foreignStock"},
+        {"title": "암호화폐", "val": "cryptoCurrency"},
+        {"title": "기업분석", "val": "companyAnalysis"},
+        {"title": "거시경제", "val": "macroEconomics"},
+        {"title": "재테크", "val": "personalFinance"},
+        {"title": "안전자산", "val": "safeAsset"}
+    ]
+}

@@ -1,22 +1,18 @@
 "use client"
 import Header from "@/components/common/Header"
-import Modal from "@/components/common/Modal"
 import React from "react"
-
-import { usePathname } from "next/navigation"
-
-
+import { NoticeDraftProvider } from "@/app/notice/NoticeDraftContext"
 
 export default function NoticeLayout({children} : {children : React.ReactNode}) {
 
-    const pathName = usePathname()
     return (
-        <div className="p-4 space-y-4">
-            <Header/>
-            <div className="mx-auto max-w-300 space-y-4">
-                {children}
+        <NoticeDraftProvider>
+            <div className="p-4 space-y-4">
+                <Header/>
+                <div className="mx-auto max-w-300 space-y-4">
+                    {children}
+                </div>
             </div>
-            <Modal/>
-        </div>
+        </NoticeDraftProvider>
     )
 }

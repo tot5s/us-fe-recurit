@@ -28,9 +28,11 @@ async function SignInFn({email, password}: {
         body: JSON.stringify({
             email: email,
             password: password
-        })
+        }),
+        credentials: "same-origin",
+        cache: "no-store",
     })
-    
+
     if (res.ok) {
         const payload = await res.clone().json()
         setAuthTokens(payload.data)
@@ -38,7 +40,6 @@ async function SignInFn({email, password}: {
 
     return res
 }
-
 
 export {
     SignUpFn,
