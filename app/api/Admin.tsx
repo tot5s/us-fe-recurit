@@ -22,7 +22,7 @@ async function SignInFn({email, password}: {
     email:string, password: string
 }) {
 
-    const res = await fetch(`${fe}/api/v1/auth/login`, {
+    const res = await fetch("/api/auth/login", {
         method: 'POST',
         headers: {"Content-type" : "application/json"},
         body: JSON.stringify({
@@ -32,8 +32,8 @@ async function SignInFn({email, password}: {
     })
     
     if (res.ok) {
-        const payload = await res.json()
-        setAuthTokens(payload)
+        const payload = await res.clone().json()
+        setAuthTokens(payload.data)
     }
 
     return res

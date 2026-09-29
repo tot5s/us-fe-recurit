@@ -12,3 +12,4 @@ ADR은 아키텍처나 기술 선택처럼 이후 구현에도 영향을 주는 
 ## 결정 목록
 
 - [0001. 클라이언트 메모리에서 토큰 관리](./0001-client-memory-token-refresh.md)
+- [0002. HttpOnly 쿠키와 BFF로 refresh token 관리](./0002-refresh-token-http-only-cookie.md)

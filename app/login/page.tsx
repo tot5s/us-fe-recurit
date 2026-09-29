@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import Button from "@/components/ui/Button"
 import Texts from "@/components/ui/Texts"
@@ -8,6 +9,7 @@ import { SignInFn } from "../api/Admin"
 
 
 export default function SignIn() {
+    const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
@@ -16,7 +18,7 @@ export default function SignIn() {
     const signInHandler = async () => {
         await SignInFn({email, password}).then((res) => {
             if(res.status == 200) {
-                location.href="/notice/contents"
+                router.replace("/notice/contents")
             } else if (res.status == 400) {
                 setSigninError(true)
             } else {

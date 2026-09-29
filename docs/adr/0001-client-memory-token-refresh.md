@@ -1,9 +1,9 @@
 # 0001. 클라이언트 메모리에서 토큰 관리
 
-- 상태: 승인
+- 상태: 대체됨
 - 작성일: 2026-09-28
 - 결정일: 2026-09-28
-- 대체한 ADR: 해당 없음
+- 대체한 ADR: [0002. HttpOnly 쿠키와 BFF로 refresh token 관리](./0002-refresh-token-http-only-cookie.md)
 
 ## 맥락
 

@@ -1,15 +1,12 @@
 type TokenPayload = {
   access_token?: unknown
   accessToken?: unknown
-  refresh_token?: unknown
-  refreshToken?: unknown
   expires_in?: unknown
   expiresIn?: unknown
 }
 
 type AuthTokens = {
   accessToken: string
-  refreshToken: string | null
   expiresAt: number
 }
 
@@ -19,9 +16,8 @@ const DEFAULT_ACCESS_TOKEN_LIFETIME_SECONDS = 15 * 60
 let tokens: AuthTokens | null = null
 let refreshInFlight: Promise<string | null> | null = null
 
-function parseTokenPayload(payload: TokenPayload) {
+function tokenFields(payload: TokenPayload) {
   const accessToken = payload.access_token ?? payload.accessToken
-  const refreshToken = payload.refresh_token ?? payload.refreshToken
   const expiresIn = payload.expires_in ?? payload.expiresIn
 
   if (typeof accessToken !== "string" || accessToken.length === 0) {
@@ -30,7 +26,6 @@ function parseTokenPayload(payload: TokenPayload) {
 
   return {
     accessToken,
-    refreshToken: typeof refreshToken === "string" ? refreshToken : null,
     expiresInSeconds:
       typeof expiresIn === "number" && Number.isFinite(expiresIn)
         ? expiresIn
@@ -39,10 +34,9 @@ function parseTokenPayload(payload: TokenPayload) {
 }
 
 export function setAuthTokens(payload: TokenPayload) {
-  const parsed = parseTokenPayload(payload)
+  const parsed = tokenFields(payload)
   tokens = {
     accessToken: parsed.accessToken,
-    refreshToken: parsed.refreshToken,
     expiresAt:
       Date.now() + parsed.expiresInSeconds * 1000 - REFRESH_MARGIN_MS,
   }
@@ -53,34 +47,24 @@ export function clearAuthTokens() {
   refreshInFlight = null
 }
 
-async function refreshAccessToken(): Promise<string | null> {
-  if (!tokens) return null
-
+async function requestNewAccessToken(): Promise<string | null> {
   try {
-    const response = await fetch(
-      "https://fe-assignment-api.us-insight.com/api/v1/auth/refresh",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        ...(tokens.refreshToken
-          ? { body: JSON.stringify({ refreshToken: tokens.refreshToken }) }
-          : {}),
-      },
-    )
+    const response = await fetch("/api/auth/refresh", {
+      method: "POST",
+      credentials: "same-origin",
+      cache: "no-store",
+    })
 
     if (!response.ok) {
       clearAuthTokens()
       return null
     }
 
-    const payload = (await response.json()) as TokenPayload
-    const previousRefreshToken = tokens?.refreshToken ?? null
-    setAuthTokens({
-      ...payload,
-      refreshToken:
-        payload.refresh_token ?? payload.refreshToken ?? previousRefreshToken,
-    })
+    const result = (await response.json()) as {
+      data?: TokenPayload
+    } & TokenPayload
+    const payload = result.data ?? result
+    setAuthTokens(payload)
     return tokens?.accessToken ?? null
   } catch {
     clearAuthTokens()
@@ -88,17 +72,19 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
-export async function getAccessToken(): Promise<string | null> {
-  if (!tokens) return null
-  if (Date.now() < tokens.expiresAt) return tokens.accessToken
-
+function refreshAccessToken() {
   if (!refreshInFlight) {
-    refreshInFlight = refreshAccessToken().finally(() => {
+    refreshInFlight = requestNewAccessToken().finally(() => {
       refreshInFlight = null
     })
   }
 
   return refreshInFlight
+}
+
+export async function getAccessToken(): Promise<string | null> {
+  if (tokens && Date.now() < tokens.expiresAt) return tokens.accessToken
+  return refreshAccessToken()
 }
 
 export async function fetchWithAuth(
@@ -108,7 +94,21 @@ export async function fetchWithAuth(
   const accessToken = await getAccessToken()
   if (!accessToken) throw new Error("로그인이 만료되었습니다. 다시 로그인해 주세요.")
 
-  const headers = new Headers(init.headers)
-  headers.set("Authorization", `Bearer ${accessToken}`)
-  return fetch(input, { ...init, headers })
+  const makeRequest = (token: string) => {
+    const headers = new Headers(init.headers)
+    headers.set("Authorization", `Bearer ${token}`)
+    return fetch(input, { ...init, headers })
+  }
+
+  const response = await makeRequest(accessToken)
+  if (response.status !== 401) return response
+
+  // 다른 요청이 이미 토큰을 갱신했으면 그 토큰으로 재시도합니다.
+  const refreshedToken =
+    tokens?.accessToken && tokens.accessToken !== accessToken
+      ? tokens.accessToken
+      : await refreshAccessToken()
+
+  if (!refreshedToken) return response
+  return makeRequest(refreshedToken)
 }

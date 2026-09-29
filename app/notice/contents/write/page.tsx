@@ -4,13 +4,15 @@
 import Texts from "@/components/ui/Texts"
 import TextBox from "@/components/ui/TextBox"
 import TextinputBtn from "@/components/ui/TextinputBtn"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Checkbox from "@/components/ui/Checkbox"
+
 
 export default function Write() {
 
     const [urlStr, setUrlStr] = useState('')
 
+    
     
     return (
         <div className="space-y-4 w-150 mx-auto">
