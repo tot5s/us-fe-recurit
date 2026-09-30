@@ -129,15 +129,15 @@ export default function Contents() {
                                     className="text-center cursor-pointer hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#17A48A]"
                                 >
                                     <td className="py-4">
-                                        {row?.id}
+                                        {total - ((currentPage - 1) * limit + idx)}
                                     </td>
-                                    <td className=" py-4 flex items-center justify-between px-4 text-left">
+                                    <td className="relative py-4 px-4 text-left align-middle">
                                         <div>
                                             {row?.title}
                                         </div>
                                         {
                                             !row?.notification_status?.has_notification && row.status == 'private' && (
-                                             <div className="">
+                                             <div className="absolute right-4 top-1/2 -translate-y-1/2">
                                                 <button onClick={(event) => {
                                                     event.stopPropagation()
                                                     router.push(`/notice/setalerts/write?content_id=${encodeURIComponent(String(row.id))}`)

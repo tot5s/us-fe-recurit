@@ -710,12 +710,11 @@ export function NoticeDraftProvider({ children }: { children: ReactNode }) {
                                         <div className="font-semibold">알람 내용</div>
                                         <div className="flex-1">
                                             <label htmlFor="alertTitle">
-                                            <input type="checkbox" name="" id="alertTitle" className="mr-1"
+                                            <input type="checkbox" name="" id="alertTitle" className="mr-1" checked={useTitle}
                                             onChange={(e) => {
-                                                setUseTitle(e.target.checked)
-                                                if(e.target.checked) {
-                                                    setAlertTitle(draft.title)
-                                                }
+                                                const isChecked = e.target.checked
+                                                setUseTitle(isChecked)
+                                                setAlertTitle(isChecked ? draft.title : "")
                                             }}
                                             />
                                                 콘텐츠 제목 사용

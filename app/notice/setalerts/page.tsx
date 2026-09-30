@@ -150,7 +150,7 @@ export default function SetAlerts() {
                     </thead>
                     <tbody>
                         {
-                            rows.length > 0 ? rows.map((row) => (
+                            rows.length > 0 ? rows.map((row, idx) => (
                                 <tr
                                     key={row.id}
                                     tabIndex={0}
@@ -165,9 +165,9 @@ export default function SetAlerts() {
                                     className="text-center cursor-pointer hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#17A48A]"
                                 >
                                     <td className="py-4">
-                                        {row.id}
+                                        {total - ((currentPage - 1) * limit + idx)}
                                     </td>
-                                    <td className=" py-4 flex items-center justify-between px-4 text-left">
+                                    <td className="py-4 px-4 text-center">
                                         <div>
                                             {row.title}
                                         </div>
