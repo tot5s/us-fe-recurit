@@ -5,6 +5,7 @@ import category from '@/public/common/category.json'
 import { GetContentsListFn } from "@/app/api/Notice";
 import Pagenation from "@/components/ui/pagenation";
 import Select from "@/components/ui/Select";
+import { useRouter } from 'next/navigation';
 
 import { useState, useEffect } from "react";
 import dayjs from 'dayjs';
@@ -22,6 +23,8 @@ export default function Contents() {
     const [currentPage , setCurrentPage] = useState(1)
     const [limit, setLimit] = useState(10)
     const [total, setTotal] = useState(0)
+
+    const router = useRouter()
 
     const [ categoryVal, setCategoryVal] = useState('')
     const [ statusVal, setStatusVal ] = useState('')
@@ -109,8 +112,22 @@ export default function Contents() {
                     </thead>
                     <tbody>
                         {
-                            rows.map((row, idx) => (
-                                <tr key={idx} className="text-center">
+                            rows.length > 0 ? (
+                                rows.map((row, idx) => (
+                                <tr
+                                    key={idx}
+                                    tabIndex={0}
+                                    aria-label={`${row.title} 수정 화면 열기`}
+                                    onClick={() => router.push(`/notice/contents/write?id=${encodeURIComponent(String(row.id))}`)}
+                                    onKeyDown={(event) => {
+                                        if (event.target !== event.currentTarget) return
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault()
+                                            router.push(`/notice/contents/write?id=${encodeURIComponent(String(row.id))}`)
+                                        }
+                                    }}
+                                    className="text-center cursor-pointer hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#17A48A]"
+                                >
                                     <td className="py-4">
                                         {row?.id}
                                     </td>
@@ -119,16 +136,19 @@ export default function Contents() {
                                             {row?.title}
                                         </div>
                                         {
-                                            !row?.notification_status?.has_notification && (
+                                            !row?.notification_status?.has_notification && row.status == 'private' && (
                                              <div className="">
-                                                <button className="text-gray-500 border border-gray-500 px-2 py-2.5 text-sm rounded-lg">
+                                                <button onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    router.push(`/notice/setalerts/write?content_id=${encodeURIComponent(String(row.id))}`)
+                                                }} className="text-gray-500 border border-gray-500 px-2 py-2.5 text-sm rounded-lg">
                                                     푸시알림 생성
                                                 </button>
                                             </div>
                                             )
                                          }
                                     </td>
-                                    <td className="py-4">{dayjs(row?.created_at).format('YY.MM.DD HH:mm')}</td>
+                                    <td className="py-4 w-[5%]">{dayjs(row?.created_at).format('YY.MM.DD HH:mm')}</td>
                                     <td className="py-4">
                                         <div className="badge bg-[#F5FBFA] text-sm text-[#17A48A] rounded-lg">
                                             
@@ -139,6 +159,13 @@ export default function Contents() {
                                     </td>
                                 </tr>
                             ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={4} className='text-center py-4 text-gray-500'>
+                                        생성된 콘텐츠가 없습니다.
+                                    </td>
+                                </tr>
+                            )
                         }
                     </tbody>
                 </table>

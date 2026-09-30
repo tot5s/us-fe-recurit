@@ -1,25 +1,130 @@
 "use client"
 
 import Pagenation from "@/components/ui/pagenation";
+import { GetNotificationFn } from "@/app/api/Notice";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
 
-import { useState } from "react";
+type AlertRow = {
+    id: number | string
+    title: string
+    success: number | string
+    fail: number | string
+    sendDate: string
+    date: string
+    state: string
+}
+
+const formatDate = (value?: string | null) => {
+    if (!value) return "-"
+    const parsed = dayjs(value)
+    return parsed.isValid() ? parsed.format("YY.MM.DD HH:mm") : "-"
+}
+
+const formatCount = (value: unknown) => {
+    if (value === null || value === undefined || value === "") return "-"
+    const count = Number(value)
+    return Number.isFinite(count) ? count : "-"
+}
+
+const getSendState = (value?: string) => {
+    switch (value?.toLowerCase()) {
+        case "sent":
+        case "success":
+        case "completed":
+            return "발송"
+        case "failed":
+        case "failure":
+            return "실패"
+        case "pending":
+        case "scheduled":
+            return "예약"
+        default:
+            return value || "-"
+    }
+}
 
 
 export default function SetAlerts() {
+    const router = useRouter()
 
     // pagination 값
-     const [currentPage , setCurrentPage] = useState(1)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [limit, setLimit] = useState(10)
+    const [isQueryInitialized, setIsQueryInitialized] = useState(false)
+    const [rows, setRows] = useState<AlertRow[]>([])
+    const [total, setTotal] = useState(0)
+    const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(true)
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const pageParam = Number(params.get("page"))
+        const limitParam = Number(params.get("limit"))
 
-    const columns = [
-        '번호', '제목', '발송 성공', '발송 실패', '발송 날짜', '공개일자', '상태'
-    ]
-    
-    const [rows, setRows] = useState([
-        { id: 1, title: '알림설정 제목 1', success: 10, fail: 2, sendDate: '2023-01-01', date: '2023-01-01', state: '발송' },
-        { id: 2, title: '알림설정 제목 2', success: 5, fail: 0, sendDate: '2023-01-02', date: '2023-01-02', state: '실패' },
-        { id: 3, title: '알림설정 제목 3', success: 8, fail: 1, sendDate: '2023-01-03', date: '2023-01-03', state: '예약' }
-    ]);
+        setCurrentPage(Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1)
+        setLimit(Number.isInteger(limitParam) && limitParam > 0 ? limitParam : 10)
+        setIsQueryInitialized(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isQueryInitialized) return
+
+        const params = new URLSearchParams(window.location.search)
+        params.set("page", String(currentPage))
+        params.set("limit", String(limit))
+        const query = params.toString()
+        const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`
+        window.history.replaceState(null, "", nextUrl)
+    }, [isQueryInitialized, currentPage, limit])
+
+    useEffect(() => {
+        if (!isQueryInitialized) return
+
+        let isActive = true
+        setIsLoading(true)
+        setError("")
+
+        GetNotificationFn({ page: currentPage, limit })
+            .then(async (response) => {
+                if (!response.ok) {
+                    throw new Error(`알람 목록 조회에 실패했습니다. (HTTP ${response.status})`)
+                }
+
+                const result = await response.json()
+                const data = result?.data ?? result
+                const notifications = Array.isArray(data)
+                    ? data
+                    : data?.notifications ?? data?.items ?? []
+
+                if (!isActive) return
+                setRows(notifications.map((item: any) => ({
+                    id: item.id,
+                    title: item.title ?? "",
+                    success: formatCount(item.stats?.success_count ?? item.success_count ?? item.success ?? item.sent_count),
+                    fail: formatCount(item.stats?.failure_count ?? item.failure_count ?? item.failed_count ?? item.fail),
+                    sendDate: formatDate(item.sent_at ?? item.send_at ),
+                    date: formatDate(item.content_published_at ?? item.published_at ?? item.content?.published_at ?? item.content?.created_at),
+                    state: getSendState(item.send_status ?? item.status),
+                })))
+                setTotal(Number(data?.total ?? result?.total ?? notifications.length))
+                setError("")
+            })
+            .catch((fetchError) => {
+                if (!isActive) return
+                setRows([])
+                setTotal(0)
+                setError(fetchError instanceof Error ? fetchError.message : "알람 목록을 불러오지 못했습니다.")
+            })
+            .finally(() => {
+                if (isActive) setIsLoading(false)
+            })
+
+        return () => {
+            isActive = false
+        }
+    }, [isQueryInitialized, currentPage, limit])
 
      const changePage = (page: number) => {
         setCurrentPage(page)
@@ -45,8 +150,20 @@ export default function SetAlerts() {
                     </thead>
                     <tbody>
                         {
-                            rows.map((row) => (
-                                <tr key={row.id} className="text-center">
+                            rows.length > 0 ? rows.map((row) => (
+                                <tr
+                                    key={row.id}
+                                    tabIndex={0}
+                                    aria-label={`${row.title} 알람 설정 수정`}
+                                    onClick={() => router.push(`/notice/setalerts/write?notification_id=${encodeURIComponent(String(row.id))}`)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter" || event.key === " ") {
+                                            event.preventDefault()
+                                            router.push(`/notice/setalerts/write?notification_id=${encodeURIComponent(String(row.id))}`)
+                                        }
+                                    }}
+                                    className="text-center cursor-pointer hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#17A48A]"
+                                >
                                     <td className="py-4">
                                         {row.id}
                                     </td>
@@ -72,15 +189,21 @@ export default function SetAlerts() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))
+                            )) : (
+                                <tr>
+                                    <td colSpan={7} className="py-4 text-center text-gray-500">
+                                        {isLoading ? "알람을 불러오는 중..." : error || "등록된 알람이 없습니다."}
+                                    </td>
+                                </tr>
+                            )
                         }
                     </tbody>
                 </table>
 
                 <div>
-                    <Pagenation totalCount={20} perPage={10} currentPage={currentPage} onPageChange={changePage}/>
+                    <Pagenation totalCount={total} perPage={limit} currentPage={currentPage} onPageChange={changePage}/>
                 </div>
             </div>
         </div>
     )
-} 
+}

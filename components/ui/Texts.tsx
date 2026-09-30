@@ -6,10 +6,13 @@ type TextsProps = {
     title?: string;
     limit?: number;
     val?: string;
+    warning?: string;
+    warningPosition?: "title" | "below";
+    warningBorderClass?: string;
     onTextHandler: (str:string) => void
 }
 
-export default function Texts({type, placeholder, title, val, limit, onTextHandler}: TextsProps) {
+export default function Texts({type, placeholder, title, val, limit, warning, warningPosition = "title", warningBorderClass, onTextHandler}: TextsProps) {
 
     const [str, setStr] = useState(0)
 
@@ -19,10 +22,11 @@ export default function Texts({type, placeholder, title, val, limit, onTextHandl
                 <span className="font-bold">
                     {title}
                 </span>
+                {warning && warningPosition === "title" && <span role="alert" className="ml-2 text-sm text-rose-600">{warning}</span>}
            </div>
             <div className="relative">
                 <input 
-                    className="border border-gray-300 rounded-xl p-2 w-full placeholder:text-gray-300" 
+                    className={`border rounded-xl p-2 w-full placeholder:text-gray-300 ${warning ? warningBorderClass ?? "border-rose-600" : "border-gray-300"}`}
                     type={type} 
                     placeholder={placeholder}
                     value={val}
@@ -34,11 +38,14 @@ export default function Texts({type, placeholder, title, val, limit, onTextHandl
                 {
                     limit && (
                         <div className="text-gray-300 absolute top-2.5 right-5">
-                            {str}/{limit}
+                            {val !== undefined ? val.length : str}/{limit}
                         </div>
                     )
                 }
             </div>
+            {warning && warningPosition === "below" && (
+                <p role="alert" className="mt-1 text-sm text-rose-600">{warning}</p>
+            )}
         </div>
     )
 }

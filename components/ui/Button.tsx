@@ -5,10 +5,11 @@ type ButtonProps = {
     text: string;
     onClick: () => void;
     disabled?: boolean;
+    className?: string;
 };
 
 
-export default function Button({type, text, onClick, disabled}: ButtonProps){
+export default function Button({type, text, onClick, disabled, className}: ButtonProps){
 
     const defaltStyle = "bg-[#17A48A] text-white rounded-xl px-3 py-2 w-full font-semibold disabled:cursor-not-allowed disabled:opacity-50"
 
@@ -16,7 +17,7 @@ export default function Button({type, text, onClick, disabled}: ButtonProps){
 
     return (
         <button onClick={onClick} disabled={disabled} className={
-            type == 'light' ? lightStyle : defaltStyle
+            `${type == 'light' ? lightStyle : defaltStyle} ${className ?? ''}`
         }>
         {text}
         </button>

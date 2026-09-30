@@ -7,9 +7,10 @@ type ModalProps = {
     onClose: () => void
     ariaLabel: string
     children: ReactNode
+    width?: number
 }
 
-export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, ariaLabel, children, width }: ModalProps) {
     if (!isOpen) return null
 
     const closeOnBackdrop = (event: MouseEvent<HTMLDivElement>) => {
@@ -26,6 +27,7 @@ export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalPro
                 aria-modal="true"
                 aria-label={ariaLabel}
                 className="w-full max-w-lg rounded-xl bg-white shadow-xl"
+                style={width ? { width, maxWidth: "100%" } : undefined}
             >
                 {children}
             </section>

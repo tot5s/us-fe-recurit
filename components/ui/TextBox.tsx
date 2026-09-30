@@ -6,10 +6,11 @@ type TextBoxProps = {
     placeholder?: string;
     title?: string;
     limit?: number
+    val?: string
     onTextBoxHandler: (str: string) => void
 }
 
-export default function TextBox({placeholder, title, limit, onTextBoxHandler}: TextBoxProps) {
+export default function TextBox({placeholder, title, limit, val, onTextBoxHandler}: TextBoxProps) {
 
     const [str, setStr] = useState(0)
     return (
@@ -24,6 +25,7 @@ export default function TextBox({placeholder, title, limit, onTextBoxHandler}: T
                 className="border border-gray-300 rounded-xl p-2 w-full placeholder:text-gray-300 resize-none h-20"
                 placeholder={placeholder} 
                 maxLength={limit}
+                value={val ?? ''}
                 onChange={(e) => {
                     setStr(e.target.value.length)
                     onTextBoxHandler(e.target.value)
@@ -31,7 +33,7 @@ export default function TextBox({placeholder, title, limit, onTextBoxHandler}: T
                 />
                {limit && (
                     <div className="text-gray-300 absolute bottom-2.5 right-5">
-                        {str}/{limit}
+                        {val !== undefined ? val.length : str}/{limit}
                     </div>
                 )
                }

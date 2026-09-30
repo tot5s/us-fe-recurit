@@ -71,9 +71,18 @@ const GetContentsDetailFn = async({
         id
     })
 
-    return fetchWithAuth(`${fe}/api/v1/contents?${params}`, {
-        method: "GET"
+    const res = await fetchWithAuth(`${fe}/api/v1/contents?${params}`, {
+        method: "GET",
+         headers: {
+      "Content-Type": "application/json",
+    },
     })
+
+    if (!res.ok) {
+        throw new Error(`콘텐츠 조회에 실패했습니다. (HTTP ${res.status})`)
+    }
+
+    return res.json()
 }
 
 const PutContentsDetail = async({
@@ -89,19 +98,15 @@ const PutContentsDetail = async({
     link_url: string,
     title: string
 }) => {
-    const categoriesString = categories.join(',');
-
-    const params = new URLSearchParams({
-        id,
-        body,
-        categories: categoriesString,
-        link_url,
-        title
-    })
-
-    return fetchWithAuth(`${fe}/api/v1/contents`, {
+    return fetchWithAuth(`${fe}/api/v1/contents/${id}`, {
         method: "PUT",
-        body: params
+        body: JSON.stringify({
+            id,
+            body,
+            categories,
+            link_url,
+            title,
+        }),
     })
 }
 
@@ -113,9 +118,15 @@ const GetContentsNoticeFn = async({
     id: string
 }) => {
 
-    return fetchWithAuth(`${fe}/api/v1/contents/${id}/notification`, {
-        method: "GET"
+    const res = fetchWithAuth(`${fe}/api/v1/contents/${id}/notification`, {
+        method: "GET",
+        headers: {
+        "Content-Type": "application/json",
+        },
     })
+
+    const data = (await res).json()
+    return data
 }
 
 const GetContentsSceduleFn = async({
@@ -164,15 +175,18 @@ const PutContentsSceduleFn = async({
     id: string
     published_at: string
 }) => {
-    const params = new URLSearchParams({
-        published_at
-    })
+    const match = published_at.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(?::(\d{2}))?/)
+    if (!match) {
+        throw new Error("예약 시간 형식이 올바르지 않습니다.")
+    }
+    const formattedPublishedAt = `${match[1]}T${match[2]}:${match[3] ?? "00"}`
 
     return fetchWithAuth(`${fe}/api/v1/contents/${id}/schedule`, {
         method: "PUT",
-        body: params
+        body: JSON.stringify({
+            published_at: formattedPublishedAt
+        })
     })
-
 }
 
 const SetContentsSceduleFn = async({
@@ -211,7 +225,7 @@ const DelContnentsSceduleFn = async({
 
 // 알람 설정
 
-const GetNotificationFn = ({
+const GetNotificationFn = async ({
     page,
     limit,
     status,
@@ -220,20 +234,20 @@ const GetNotificationFn = ({
 }: {
     page: number,
     limit: number,
-    status: string,
-    target_type: string;
-    send_status :string;
+    status?: string,
+    target_type?: string;
+    send_status?: string;
 }) => {
 
     const params = new URLSearchParams({
         page: String(page),
         limit: String(limit),
-        status,
-        target_type,
-        send_status
+        ...(status && { status }),
+        ...(target_type && { target_type }),
+        ...(send_status && { send_status }),
     })
 
-    return fetchWithAuth(`${fe}/api/v1/notifications`, {
+    return fetchWithAuth(`${fe}/api/v1/notifications?${params}`, {
         method: "GET",
     })
 }
@@ -269,10 +283,14 @@ const SetNotificationFn = async({
 const GetNotificationDetailFn = async({id} : {
     id: string
 }) => {
-    
-    return fetchWithAuth(`${fe}/api/v1/notifications/${id}`, {
-        method: "GET"
+    const res = await fetchWithAuth(`${fe}/api/v1/notifications/${id}`, {
+        method: "GET",
+        headers: {
+      "Content-Type": "application/json",
+        },
     })
+    if (!res.ok) throw new Error(`알람 상세 조회에 실패했습니다. (HTTP ${res.status})`)
+    return res.json()
 }
 
 const PutNotificationDetailFn = async({
@@ -287,17 +305,17 @@ const PutNotificationDetailFn = async({
     title: string
 }) => {
     
-    const params = new URLSearchParams({
-        content_id: String(content_id),
-        target_type,
-        title
-    })
-
     return fetchWithAuth(`${fe}/api/v1/notifications/${id}`, {
         method: "PUT",
-        body: params
+        headers: {
+      "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            content_id,
+            target_type,
+            title,
+        }),
     })
-
 }
 
 const DelNotificationDetailFn = async({
@@ -306,14 +324,12 @@ const DelNotificationDetailFn = async({
     id: number
 }) => {
     
-    const res = fetchWithAuth(`${fe}/api/v1/notifications/${id}`, {
+    return fetchWithAuth(`${fe}/api/v1/notifications/${id}`, {
         method: "DELETE",
         headers: {
         "Content-Type": "application/json",
         }
     })
-
-    return res
 }
 
 const GetNotificationScheduleFn = async({
@@ -322,9 +338,15 @@ const GetNotificationScheduleFn = async({
     id: string
 }) =>{
     
-    return fetchWithAuth(`${fe}/api/v1/notifications/${id}/schedule`,{
-        method: "GET"
+    const res = await fetchWithAuth(`${fe}/api/v1/notifications/${id}/schedule`,{
+        method: "GET",
+        headers: {
+      "Content-Type": "application/json",
+        },
     })
+
+    if (!res.ok) throw new Error(`알람 예약 조회에 실패했습니다. (HTTP ${res.status})`)
+    return res.json()
 }
 
 const PutNotificationScheduleFn = async({
@@ -335,13 +357,12 @@ const PutNotificationScheduleFn = async({
     scheduled_at: string
 }) => {
 
-    const params = new URLSearchParams({
-        scheduled_at
-    })
-
     return fetchWithAuth(`${fe}/api/v1/notifications/${id}/schedule`, {
         method: "PUT",
-        body: params
+        headers: {
+      "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ scheduled_at }),
     })
 }
 
@@ -353,13 +374,12 @@ const SetNotificationScheduleFn = async({
     scheduled_at: string;
 }) => {
 
-    const params = new URLSearchParams({
-        scheduled_at
-    })
-
-    return fetchWithAuth(`${fe}/api/v1/notifications/{id}/schedule`, {
+    return fetchWithAuth(`${fe}/api/v1/notifications/${id}/schedule`, {
         method: "POST",
-        body: params
+        headers: {
+      "Content-Type": "application/json",
+    },
+        body: JSON.stringify({ scheduled_at })
     })
 }
 
